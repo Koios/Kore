@@ -72,4 +72,23 @@ public class Favourites {
             return new ApiList<>(result, limits);
         }
     }
+
+    public static class Add extends ApiMethod<String> {
+        public final static String METHOD_NAME = "Favourites.AddFavourite";
+
+        public Add(String title, String path) {
+            super();
+            addParameterToRequest("type", "media");
+            addParameterToRequest("title", title);
+            addParameterToRequest("path", path);
+        }
+
+        @Override
+        public String getMethodName() { return METHOD_NAME; }
+
+        @Override
+        public String resultFromJson(ObjectNode jsonObject) throws ApiException {
+            return jsonObject.get(RESULT_NODE).textValue();
+        }
+    }
 }

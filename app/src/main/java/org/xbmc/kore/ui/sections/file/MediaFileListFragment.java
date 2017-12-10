@@ -37,6 +37,7 @@ import org.xbmc.kore.R;
 import org.xbmc.kore.host.HostManager;
 import org.xbmc.kore.jsonrpc.ApiCallback;
 import org.xbmc.kore.jsonrpc.HostConnection;
+import org.xbmc.kore.jsonrpc.method.Favourites;
 import org.xbmc.kore.jsonrpc.method.Files;
 import org.xbmc.kore.jsonrpc.method.Player;
 import org.xbmc.kore.jsonrpc.method.Playlist;
@@ -383,6 +384,28 @@ public class MediaFileListFragment extends AbstractListFragment {
         }, callbackHandler);
     }
 
+    private void addToFavourites(String title, String path) {
+        // TODO: query current favourites; if already added then display alert
+        // TODO: later: use star ui via cached favourites, and check again when changing state
+        Favourites.Add action = new Favourites.Add(title, path);
+        action.execute(hostManager.getConnection(), new ApiCallback<String>() {
+            @Override
+            public void onSuccess(String result) {
+                Toast.makeText(getActivity(),
+                        "Toggled favourites state.",
+                        Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(int errorCode, String description) {
+                // TODO: log
+                Toast.makeText(getActivity(),
+                        String.format("Failed to add to favourites: %1$s.", description),
+                        Toast.LENGTH_SHORT).show();
+            }
+        }, callbackHandler);
+    }
+
     /**
      * Queues the given media file on the active playlist, and starts it if nothing is playing
      * @param filename File to queue
@@ -542,6 +565,8 @@ public class MediaFileListFragment extends AbstractListFragment {
                                         }
                                         playMediaFile(loc.file);
                                         return true;
+                                    case R.id.action_add_to_favourites:
+                                        addToFavourites(loc.title, loc.file);
                                 }
                                 return false;
                             }

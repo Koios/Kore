@@ -183,6 +183,7 @@
     <string name="queue_file">Queue</string>
     <string name="play_file">Play</string>
     <string name="play_from_here">Play From Here</string>
+    <string name="add_to_favourites">Add To Favourites</string>
 
     <string name="connecting_to_xbmc">Connecting…</string>
     <string name="unable_to_connect_to_xbmc">Unable to connect to media center</string>

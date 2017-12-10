@@ -28,4 +28,8 @@
         android:title="@string/play_from_here"
         android:orderInCategory="3"
         app:showAsAction="never" />
+    <item android:id="@+id/action_add_to_favourites"
+        android:title="@string/add_to_favourites"
+        android:orderInCategory="3"
+        app:showAsAction="never" />
 </menu>
