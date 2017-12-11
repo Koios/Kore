@@ -36,11 +36,13 @@ import android.widget.Toast;
 import org.xbmc.kore.R;
 import org.xbmc.kore.host.HostManager;
 import org.xbmc.kore.jsonrpc.ApiCallback;
+import org.xbmc.kore.jsonrpc.ApiList;
 import org.xbmc.kore.jsonrpc.HostConnection;
 import org.xbmc.kore.jsonrpc.method.Favourites;
 import org.xbmc.kore.jsonrpc.method.Files;
 import org.xbmc.kore.jsonrpc.method.Player;
 import org.xbmc.kore.jsonrpc.method.Playlist;
+import org.xbmc.kore.jsonrpc.type.FavouriteType;
 import org.xbmc.kore.jsonrpc.type.ItemType;
 import org.xbmc.kore.jsonrpc.type.ListType;
 import org.xbmc.kore.jsonrpc.type.PlayerType;
@@ -51,6 +53,7 @@ import org.xbmc.kore.utils.UIUtils;
 import org.xbmc.kore.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -384,23 +387,60 @@ public class MediaFileListFragment extends AbstractListFragment {
         }, callbackHandler);
     }
 
-    private void addToFavourites(String title, String path) {
-        // TODO: query current favourites; if already added then display alert
-        // TODO: later: use star ui via cached favourites, and check again when changing state
+    private static boolean containsFavourite(final List<FavouriteType.DetailsFavourite> list,
+                                             final String path) {
+        // TODO: this is very inelegant
+        for (FavouriteType.DetailsFavourite elem : list)
+            if(elem.path.equals(path)) return true;
+        return false;
+    }
+
+    private void toggleFavourite(String title, String path) {
         Favourites.Add action = new Favourites.Add(title, path);
         action.execute(hostManager.getConnection(), new ApiCallback<String>() {
             @Override
             public void onSuccess(String result) {
+                // TODO: this is probably just noise? replace with star UI
+                // TODO: text doesn't match function, but this is the only usage
                 Toast.makeText(getActivity(),
-                        "Toggled favourites state.",
+                        "Added to favourites.",
                         Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onError(int errorCode, String description) {
                 // TODO: log
+                // TODO: text doesn't match function, but this is the only usage
                 Toast.makeText(getActivity(),
                         String.format("Failed to add to favourites: %1$s.", description),
+                        Toast.LENGTH_SHORT).show();
+            }
+        }, callbackHandler);
+    }
+
+    private void addToFavourites(final String title, final String path) {
+        // TODO: query current favourites; if already added then display alert
+        // TODO: later: use star ui via cached favourites, and check again when changing state
+        Favourites.GetFavourites getFavouritesAction = new Favourites.GetFavourites();
+        getFavouritesAction.execute(hostManager.getConnection(), new ApiCallback<ApiList<FavouriteType.DetailsFavourite>>() {
+            @Override
+            public void onSuccess(ApiList<FavouriteType.DetailsFavourite> result) {
+                if(containsFavourite(result.items, path)) {
+                    // TODO: this toast isn't necessary, since the postcondition is in fact
+                    //       fulfilled: the item is a favourite.
+                    Toast.makeText(getActivity(),
+                            "Is already a favourite.",
+                            Toast.LENGTH_SHORT).show();
+                }else {
+                    toggleFavourite(title, path);
+                }
+            }
+
+            @Override
+            public void onError(int errorCode, String description) {
+                // TODO: log
+                Toast.makeText(getActivity(),
+                        String.format("Failed to check favourites: %1$s.", description),
                         Toast.LENGTH_SHORT).show();
             }
         }, callbackHandler);
