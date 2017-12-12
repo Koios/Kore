@@ -15,23 +15,30 @@
  */
 package org.xbmc.kore.jsonrpc.method;
 
+import android.os.Handler;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import org.xbmc.kore.jsonrpc.ApiCallback;
 import org.xbmc.kore.jsonrpc.ApiException;
 import org.xbmc.kore.jsonrpc.ApiList;
 import org.xbmc.kore.jsonrpc.ApiMethod;
+import org.xbmc.kore.jsonrpc.HostConnection;
 import org.xbmc.kore.jsonrpc.type.FavouriteType;
 import org.xbmc.kore.jsonrpc.type.ListType;
+import org.xbmc.kore.utils.LogUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * All JSON RPC methods in Favourites.*
  */
 public class Favourites {
+    private static final String TAG = LogUtils.makeLogTag(Favourites.class);
 
     /**
      * Retrieves the Details of the Favourites.
@@ -93,5 +100,71 @@ public class Favourites {
         public String resultFromJson(ObjectNode jsonObject) throws ApiException {
             return jsonObject.get(RESULT_NODE).textValue();
         }
+    }
+
+    private static boolean containsFavourite(final List<FavouriteType.DetailsFavourite> list,
+                                             final String path) {
+        // TODO: this is very inelegant
+        for (FavouriteType.DetailsFavourite elem : list)
+            if(elem.path.equals(path)) return true;
+        return false;
+    }
+
+    /**
+     * Convenience ApiMethod which calls GetFavourites, Toggle under the hood.
+     *
+     * Same usage as an ApiMethod<Boolean> extension; the boolean parameter is true IFF the item
+     * was NOT a favourite just before we toggled it.
+     */
+    public static class Add {
+        public Add(String title, String path) {
+            this.title = title;
+            this.path = path;
+        }
+
+        public void execute(final HostConnection hostConnection,
+                            final ApiCallback<Boolean> callback,
+                            final Handler handler) {
+            GetFavourites getFavourites = new GetFavourites();
+            getFavourites.execute(hostConnection, new ApiCallback<ApiList<FavouriteType.DetailsFavourite>>() {
+                @Override
+                public void onSuccess(ApiList<FavouriteType.DetailsFavourite> result) {
+                    LogUtils.LOGD(TAG,
+                            String.format("Successfully retrieved favourites to add new favourite: %1$s",
+                                    path));
+
+                    if(containsFavourite(result.items, path)) {
+                        LogUtils.LOGI(TAG, String.format("Item is already a favourite: %1$s", path));
+                        callback.onSuccess(false);
+                    }else {
+                        LogUtils.LOGI(TAG, String.format("Item is NOT a favourite yet: %1$s", path));
+
+                        Toggle toggle = new Toggle(title, path);
+                        toggle.execute(hostConnection, new ApiCallback<String>() {
+                            @Override
+                            public void onSuccess(String result) {
+                                LogUtils.LOGI(TAG, String.format("Successfully toggled favourite state for: %1$s", path));
+                                callback.onSuccess(true);
+                            }
+
+                            @Override
+                            public void onError(int errorCode, String description) {
+                                LogUtils.LOGE(TAG, String.format("Failed to toggle favourite state for: %1$s", path));
+                                callback.onError(errorCode, description);
+                            }
+                        }, handler);
+                    }
+                }
+
+                @Override
+                public void onError(int errorCode, String description) {
+                    LogUtils.LOGE(TAG, String.format("Failed to get favourites while trying to add new favourite: %1$s", path));
+                    callback.onError(errorCode, description);
+                }
+            }, handler);
+        }
+
+        private final String title;
+        private final String path;
     }
 }

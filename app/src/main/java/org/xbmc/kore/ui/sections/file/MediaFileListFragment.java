@@ -387,63 +387,21 @@ public class MediaFileListFragment extends AbstractListFragment {
         }, callbackHandler);
     }
 
-    private static boolean containsFavourite(final List<FavouriteType.DetailsFavourite> list,
-                                             final String path) {
-        // TODO: this is very inelegant
-        for (FavouriteType.DetailsFavourite elem : list)
-            if(elem.path.equals(path)) return true;
-        return false;
-    }
-
-    private void addFavouriteWhichDoesntExistYet(final String title, final String path) {
-        Favourites.Toggle action = new Favourites.Toggle(title, path);
-        action.execute(hostManager.getConnection(), new ApiCallback<String>() {
+    private void addToFavourites(final String title, final String path) {
+        Favourites.Add addFavourite = new Favourites.Add(title, path);
+        addFavourite.execute(hostManager.getConnection(), new ApiCallback<Boolean>() {
             @Override
-            public void onSuccess(String result) {
-                // TODO: this is probably just noise? replace with star UI
-                Toast.makeText(getActivity(),
-                        "Added to favourites.",
-                        Toast.LENGTH_SHORT).show();
+            public void onSuccess(Boolean result) {
+                // TODO: use star ui instead of toast
+                String text = result ? "New favourite!" : "Already a favourite.";
+                Toast.makeText(getActivity(), text, Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onError(int errorCode, String description) {
-                String format = "Failed to toggle favourite state for path '%1$s' with error: %2$s";
-                LogUtils.LOGE(TAG, String.format(format, path, description));
-
                 Toast.makeText(getActivity(),
                         String.format("Failed to add to favourites: %1$s.", description),
                         Toast.LENGTH_LONG).show();
-            }
-        }, callbackHandler);
-    }
-
-    private void addToFavourites(final String title, final String path) {
-        // TODO: use star ui via cached favourites
-        Favourites.GetFavourites getFavouritesAction = new Favourites.GetFavourites();
-        getFavouritesAction.execute(hostManager.getConnection(),
-                new ApiCallback<ApiList<FavouriteType.DetailsFavourite>>() {
-            @Override
-            public void onSuccess(ApiList<FavouriteType.DetailsFavourite> result) {
-                if(containsFavourite(result.items, path)) {
-                    // TODO: this toast isn't necessary, since the postcondition is in fact
-                    //       fulfilled: the item is a favourite.
-                    Toast.makeText(getActivity(),
-                            "Is already a favourite.",
-                            Toast.LENGTH_SHORT).show();
-                }else {
-                    addFavouriteWhichDoesntExistYet(title, path);
-                }
-            }
-
-            @Override
-            public void onError(int errorCode, String description) {
-                String format = "Failed to query favourites with error: %1$s";
-                LogUtils.LOGE(TAG, String.format(format, description));
-
-                Toast.makeText(getActivity(),
-                        String.format("Failed to check favourites: %1$s.", description),
-                        Toast.LENGTH_SHORT).show();
             }
         }, callbackHandler);
     }
