@@ -73,10 +73,13 @@ public class Favourites {
         }
     }
 
-    public static class Add extends ApiMethod<String> {
+    public static class Toggle extends ApiMethod<String> {
+        // Although the API function name suggests that it only ADDS favourites, it actually toggles
+        // their favourite state; i.e. if there already is a favourite with the same path, that
+        // favourite is removed.
         public final static String METHOD_NAME = "Favourites.AddFavourite";
 
-        public Add(String title, String path) {
+        public Toggle(String title, String path) {
             super();
             addParameterToRequest("type", "media");
             addParameterToRequest("title", title);
