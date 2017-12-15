@@ -424,4 +424,6 @@
 
     <string name="toggle_expand">Expand/Collapse</string>
 
+    <string name="toggle_favourite">Add/Remove favourite</string>
+
 </resources>

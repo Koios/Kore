@@ -37,6 +37,19 @@
             android:scaleType="centerCrop"/>
 
         <ImageView
+            android:id="@+id/favouriteToggle"
+            android:visibility="invisible"
+            android:layout_width="@dimen/default_icon_size"
+            android:layout_height="@dimen/default_icon_size"
+            android:padding="@dimen/default_icon_padding"
+            android:layout_alignTop="@id/art"
+            android:layout_toLeftOf="@id/list_context_menu"
+            android:layout_toStartOf="@id/list_context_menu"
+            style="@style/Widget.Button.Borderless"
+            android:src="?attr/iconFavourites"
+            android:contentDescription="@string/toggle_favourite"/>
+
+        <ImageView
             android:id="@+id/list_context_menu"
             android:layout_width="@dimen/default_icon_size"
             android:layout_height="@dimen/default_icon_size"
@@ -54,8 +67,8 @@
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/art"
             android:layout_toEndOf="@+id/art"
-            android:layout_toLeftOf="@id/list_context_menu"
-            android:layout_toStartOf="@id/list_context_menu"
+            android:layout_toLeftOf="@id/favouriteToggle"
+            android:layout_toStartOf="@id/favouriteToggle"
             android:layout_alignTop="@id/art"
             style="@style/TextAppearance.Medialist.Title"/>
         <TextView
