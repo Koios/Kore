@@ -278,7 +278,7 @@ public class FavouritesListFragment extends AbstractListFragment implements Swip
 
         FavouriteItemViewHolder(View v) {
             artView = ButterKnife.findById(v, R.id.art);
-            favouriteToggle = ButterKnife.findById(v, R.id.favourite_toggle);
+            favouriteToggle = ButterKnife.findById(v, R.id.star_button);
             contextMenu = ButterKnife.findById(v, R.id.list_context_menu);
             titleView = ButterKnife.findById(v, R.id.title);
             detailView = ButterKnife.findById(v, R.id.details);

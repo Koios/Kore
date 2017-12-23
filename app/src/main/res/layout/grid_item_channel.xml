@@ -37,7 +37,7 @@
             android:scaleType="centerCrop"/>
 
         <ImageView
-            android:id="@+id/favourite_toggle"
+            android:id="@+id/star_button"
             android:visibility="invisible"
             android:layout_width="@dimen/default_icon_size"
             android:layout_height="@dimen/default_icon_size"
@@ -67,8 +67,8 @@
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/art"
             android:layout_toEndOf="@+id/art"
-            android:layout_toLeftOf="@id/favourite_toggle"
-            android:layout_toStartOf="@id/favourite_toggle"
+            android:layout_toLeftOf="@id/star_button"
+            android:layout_toStartOf="@id/star_button"
             android:layout_alignTop="@id/art"
             style="@style/TextAppearance.Medialist.Title"/>
         <TextView

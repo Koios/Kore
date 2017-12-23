@@ -46,8 +46,8 @@
             android:paddingLeft="@dimen/small_padding"
             android:paddingStart="@dimen/small_padding"/>
 
-        <org.xbmc.kore.ui.widgets.FavouriteToggle
-            android:id="@+id/favourite_toggle"
+        <org.xbmc.kore.ui.widgets.StarButton
+            android:id="@+id/star_button"
             android:layout_width="@dimen/default_icon_size"
             android:layout_height="@dimen/default_icon_size"
             android:padding="@dimen/default_icon_padding"
@@ -75,8 +75,8 @@
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/art"
             android:layout_toEndOf="@+id/art"
-            android:layout_toLeftOf="@id/favourite_toggle"
-            android:layout_toStartOf="@id/favourite_toggle"
+            android:layout_toLeftOf="@id/star_button"
+            android:layout_toStartOf="@id/star_button"
             android:layout_alignTop="@id/art"
             style="@style/TextAppearance.Medialist.Title"
             android:paddingRight="@dimen/small_padding"
@@ -92,8 +92,8 @@
             android:layout_below="@id/title"
             android:layout_toRightOf="@id/art"
             android:layout_toEndOf="@id/art"
-            android:layout_toLeftOf="@id/favourite_toggle"
-            android:layout_toStartOf="@id/favourite_toggle"
+            android:layout_toLeftOf="@id/star_button"
+            android:layout_toStartOf="@id/star_button"
             style="@style/TextAppearance.Medialist.Details"
             android:paddingRight="@dimen/small_padding"
             android:paddingEnd="@dimen/small_padding"/>

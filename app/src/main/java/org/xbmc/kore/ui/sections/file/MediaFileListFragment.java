@@ -49,7 +49,7 @@ import org.xbmc.kore.jsonrpc.type.ListType;
 import org.xbmc.kore.jsonrpc.type.PlayerType;
 import org.xbmc.kore.jsonrpc.type.PlaylistType;
 import org.xbmc.kore.ui.AbstractListFragment;
-import org.xbmc.kore.ui.widgets.FavouriteToggle;
+import org.xbmc.kore.ui.widgets.StarButton;
 import org.xbmc.kore.utils.LogUtils;
 import org.xbmc.kore.utils.UIUtils;
 import org.xbmc.kore.utils.Utils;
@@ -710,7 +710,7 @@ public class MediaFileListFragment extends AbstractListFragment {
                 viewHolder.art = (ImageView) convertView.findViewById(R.id.art);
                 viewHolder.title = (TextView) convertView.findViewById(R.id.title);
                 viewHolder.details = (TextView) convertView.findViewById(R.id.details);
-                viewHolder.favouriteToggle = (FavouriteToggle) convertView.findViewById(R.id.favourite_toggle);
+                viewHolder.starButton = (StarButton) convertView.findViewById(R.id.star_button);
                 viewHolder.contextMenu = (ImageView) convertView.findViewById(R.id.list_context_menu);
                 viewHolder.sizeDuration = (TextView) convertView.findViewById(R.id.size_duration);
 
@@ -738,18 +738,18 @@ public class MediaFileListFragment extends AbstractListFragment {
             // For the popup menu
             if (fileLocation.isDirectory) {
                 // TODO: it's not entirely clear that these operations are invalid / useless on directories
-                viewHolder.favouriteToggle.setVisibility(View.GONE);
+                viewHolder.starButton.setVisibility(View.GONE);
                 viewHolder.contextMenu.setVisibility(View.GONE);
             } else {
-                viewHolder.favouriteToggle.setVisibility(View.VISIBLE);
-                viewHolder.favouriteToggle.setOnClickListener(new View.OnClickListener() {
+                viewHolder.starButton.setVisibility(View.VISIBLE);
+                viewHolder.starButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        viewHolder.favouriteToggle.kodiToggleFavourite(hostManager, callbackHandler,
+                        viewHolder.starButton.kodiToggleFavourite(hostManager, callbackHandler,
                                 fileLocation.title, fileLocation.file);
                     }
                 });
-                viewHolder.favouriteToggle.setFavouriteStatus(isFavourite(fileLocation));
+                viewHolder.starButton.setFavouriteStatus(isFavourite(fileLocation));
 
                 viewHolder.contextMenu.setVisibility(View.VISIBLE);
                 viewHolder.contextMenu.setTag(position);
@@ -768,7 +768,7 @@ public class MediaFileListFragment extends AbstractListFragment {
         TextView title;
         TextView details;
         TextView sizeDuration;
-        FavouriteToggle favouriteToggle;
+        StarButton starButton; // TODO: proper encapsulation
         ImageView contextMenu;
     }
 

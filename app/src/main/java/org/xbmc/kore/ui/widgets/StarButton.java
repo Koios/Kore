@@ -13,10 +13,9 @@ import org.xbmc.kore.jsonrpc.method.Favourites;
 
 
 /**
- * A button to add/remove items to the favourites
- * Using a star as an icon which is either filled or just showing an outline.
+ * A button which toggles between a picture of a filled and an outlined star.
  */
-public class FavouriteToggle extends AppCompatImageButton {
+public class StarButton extends AppCompatImageButton {
 
     static int starFilled = R.drawable.ic_star_white_24dp;
     static int starOutline = R.drawable.ic_star_unfilled;
@@ -25,18 +24,18 @@ public class FavouriteToggle extends AppCompatImageButton {
 
     boolean isFavourite = false;
 
-    public FavouriteToggle(Context context) {
+    public StarButton(Context context) {
         super(context);
         setFavouriteStatus(isFavourite);
     }
 
     // TODO: silly constructor duplication
-    public FavouriteToggle(Context context, AttributeSet attrs) {
+    public StarButton(Context context, AttributeSet attrs) {
         super(context, attrs);
         setFavouriteStatus(isFavourite);
     }
 
-    public FavouriteToggle(Context context, AttributeSet attrs, int defStyle) {
+    public StarButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         setFavouriteStatus(isFavourite);
     }
@@ -50,8 +49,7 @@ public class FavouriteToggle extends AppCompatImageButton {
     public void toggleFavouriteStatus() {
         setFavouriteStatus(!isFavourite);
     }
-
-    // TODO: split into pure UI button and button + action (with built-in click event handler)?
+     // TODO: split into pure UI button and button + action (with built-in click event handler)?
     public void kodiToggleFavourite(HostManager hostManager, Handler callbackHandler,
                                     String title, String path) {
         Favourites.Toggle t = new Favourites.Toggle(title, path);
