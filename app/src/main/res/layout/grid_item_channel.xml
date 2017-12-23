@@ -36,18 +36,6 @@
             android:contentDescription="@string/poster"
             android:scaleType="centerCrop"/>
 
-        <org.xbmc.kore.ui.widgets.StarButton
-            android:id="@+id/star_button"
-            android:visibility="invisible"
-            android:layout_width="@dimen/default_icon_size"
-            android:layout_height="@dimen/default_icon_size"
-            android:padding="@dimen/default_icon_padding"
-            android:layout_alignTop="@id/art"
-            android:layout_toLeftOf="@id/list_context_menu"
-            android:layout_toStartOf="@id/list_context_menu"
-            style="@style/Widget.Button.Borderless"
-            android:contentDescription="@string/toggle_favourite"/>
-
         <ImageView
             android:id="@+id/list_context_menu"
             android:layout_width="@dimen/default_icon_size"
@@ -59,6 +47,18 @@
             style="@style/Widget.Button.Borderless"
             android:src="?attr/iconOverflow"
             android:contentDescription="@string/action_options"/>
+
+        <org.xbmc.kore.ui.widgets.StarButton
+            android:id="@+id/star_button"
+            android:layout_width="@dimen/default_icon_size"
+            android:layout_height="@dimen/default_icon_size"
+            android:padding="@dimen/default_icon_padding"
+            android:layout_alignTop="@id/art"
+            android:layout_toLeftOf="@id/list_context_menu"
+            android:layout_toStartOf="@id/list_context_menu"
+            style="@style/Widget.Button.Borderless"
+            android:visibility="invisible"
+            android:contentDescription="@string/toggle_favourite"/>
 
         <TextView
             android:id="@+id/title"

@@ -20,19 +20,19 @@ public class StarButton extends AppCompatImageButton {
     boolean isFilled = false;
 
     public StarButton(Context context) {
-        super(context);
-        setFilled(isFilled);
+        this(context, null);
     }
 
-    // TODO: silly constructor duplication
     public StarButton(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        setFilled(isFilled);
+        this(context, attrs, R.attr.imageButtonStyle);
     }
 
     public StarButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         setFilled(isFilled);
+        // if the ImageButton is focusable (which is set in the super constructor), then it blocks
+        // click events on PARENT elements like the item of a ListView
+        setFocusable(false);
     }
 
     public void setFilled(boolean isFilled) {
