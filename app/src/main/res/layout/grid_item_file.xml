@@ -45,6 +45,18 @@
             style="@style/TextAppearance.Medialist.OtherInfo"
             android:paddingLeft="@dimen/small_padding"
             android:paddingStart="@dimen/small_padding"/>
+
+        <org.xbmc.kore.ui.widgets.FavouriteToggle
+            android:id="@+id/favourite_toggle"
+            android:layout_width="@dimen/default_icon_size"
+            android:layout_height="@dimen/default_icon_size"
+            android:padding="@dimen/default_icon_padding"
+            android:layout_alignTop="@id/art"
+            android:layout_toLeftOf="@id/list_context_menu"
+            android:layout_toStartOf="@id/list_context_menu"
+            style="@style/Widget.Button.Borderless"
+            android:contentDescription="@string/toggle_favourite"/>
+
         <ImageView
             android:id="@+id/list_context_menu"
             android:layout_width="@dimen/default_icon_size"
@@ -63,8 +75,8 @@
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/art"
             android:layout_toEndOf="@+id/art"
-            android:layout_toLeftOf="@id/list_context_menu"
-            android:layout_toStartOf="@id/list_context_menu"
+            android:layout_toLeftOf="@id/favourite_toggle"
+            android:layout_toStartOf="@id/favourite_toggle"
             android:layout_alignTop="@id/art"
             style="@style/TextAppearance.Medialist.Title"
             android:paddingRight="@dimen/small_padding"
@@ -80,8 +92,8 @@
             android:layout_below="@id/title"
             android:layout_toRightOf="@id/art"
             android:layout_toEndOf="@id/art"
-            android:layout_toLeftOf="@id/size_duration"
-            android:layout_toStartOf="@id/size_duration"
+            android:layout_toLeftOf="@id/favourite_toggle"
+            android:layout_toStartOf="@id/favourite_toggle"
             style="@style/TextAppearance.Medialist.Details"
             android:paddingRight="@dimen/small_padding"
             android:paddingEnd="@dimen/small_padding"/>

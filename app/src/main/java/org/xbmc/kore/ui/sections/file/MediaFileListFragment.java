@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -42,18 +43,20 @@ import org.xbmc.kore.jsonrpc.method.Favourites;
 import org.xbmc.kore.jsonrpc.method.Files;
 import org.xbmc.kore.jsonrpc.method.Player;
 import org.xbmc.kore.jsonrpc.method.Playlist;
-import org.xbmc.kore.jsonrpc.type.FavouriteType;
+import org.xbmc.kore.jsonrpc.type.FavouriteType.DetailsFavourite;
 import org.xbmc.kore.jsonrpc.type.ItemType;
 import org.xbmc.kore.jsonrpc.type.ListType;
 import org.xbmc.kore.jsonrpc.type.PlayerType;
 import org.xbmc.kore.jsonrpc.type.PlaylistType;
 import org.xbmc.kore.ui.AbstractListFragment;
+import org.xbmc.kore.ui.widgets.FavouriteToggle;
 import org.xbmc.kore.utils.LogUtils;
 import org.xbmc.kore.utils.UIUtils;
 import org.xbmc.kore.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -166,7 +169,7 @@ public class MediaFileListFragment extends AbstractListFragment {
             ArrayList<FileLocation> list = savedInstanceState.getParcelableArrayList(PATH_CONTENTS);
             rootFileLocation = savedInstanceState.getParcelableArrayList(ROOT_PATH_CONTENTS);
             browseRootAlready = savedInstanceState.getBoolean(ROOT_VISITED);
-            ((MediaFileListAdapter) getAdapter()).setFilelistItems(list);
+            ((MediaFileListAdapter) getAdapter()).setFilelistItems(list, null);
         }
         else if (rootPath != null) {
             loadOnVisible = rootPath;
@@ -248,7 +251,7 @@ public class MediaFileListFragment extends AbstractListFragment {
 
                 browseRootAlready = true;
                 getEmptyView().setText(getString(R.string.source_empty));
-                ((MediaFileListAdapter) getAdapter()).setFilelistItems(rootFileLocation);
+                ((MediaFileListAdapter) getAdapter()).setFilelistItems(rootFileLocation, null);
             }
 
             @Override
@@ -334,7 +337,7 @@ public class MediaFileListFragment extends AbstractListFragment {
             public void onSuccess(List<ListType.ItemFile> result) {
                 if (!isAdded()) return;
 
-                ArrayList<FileLocation> flList = new ArrayList<FileLocation>();
+                final ArrayList<FileLocation> flList = new ArrayList<FileLocation>();
 
                 if (dir.hasParent) {
                     // insert the parent directory as the first item in the list
@@ -345,8 +348,14 @@ public class MediaFileListFragment extends AbstractListFragment {
                 for (ListType.ItemFile i : result) {
                     flList.add(FileLocation.newInstanceFromItemFile(getActivity(), i));
                 }
-                ((MediaFileListAdapter) getAdapter()).setFilelistItems(flList);
-                browseRootAlready = false;
+
+                getFavourites(new GetFavouritesContinuation() {
+                    @Override
+                    public void then(List<DetailsFavourite> favourites) {
+                        ((MediaFileListAdapter) getAdapter()).setFilelistItems(flList, favourites);
+                        browseRootAlready = false;
+                    }
+                });
             }
 
             @Override
@@ -359,6 +368,29 @@ public class MediaFileListFragment extends AbstractListFragment {
             }
         }, callbackHandler);
 
+    }
+
+    // TODO: is there an existing generic interface for this?
+    private interface GetFavouritesContinuation {
+        void then(List<DetailsFavourite> favourites);
+    }
+    private void getFavourites(final GetFavouritesContinuation continuation) {
+        Favourites.GetFavourites getFavourites = new Favourites.GetFavourites();
+        getFavourites.execute(hostManager.getConnection(), new ApiCallback<ApiList<DetailsFavourite>>() {
+            @Override
+            public void onSuccess(ApiList<DetailsFavourite> result) {
+                continuation.then(result.items);
+            }
+
+            @Override
+            public void onError(int errorCode, String description) {
+                final String errorMsg = String.format("Failed to get favourites: %1$s.", description);
+                // TODO: log at lower level
+                LogUtils.LOGE(TAG, errorMsg);
+                // TODO: make toasts translatable
+                Toast.makeText(getActivity(), errorMsg, Toast.LENGTH_SHORT).show();
+            }
+        }, callbackHandler);
     }
 
     /**
@@ -528,6 +560,7 @@ public class MediaFileListFragment extends AbstractListFragment {
         Context ctx;
         int resource;
         List<FileLocation> fileLocationItems = null;
+        HashSet<String> favouritePaths;
 
         int artWidth;
         int artHeight;
@@ -595,11 +628,14 @@ public class MediaFileListFragment extends AbstractListFragment {
         /**
          * Manually set the items on the adapter
          * Calls notifyDataSetChanged()
+         * Note that favourites is also passed because updating the view requires to have both lists.
          *
          * @param items list of files/directories
          */
-        public void setFilelistItems(List<FileLocation> items) {
+        public void setFilelistItems(List<FileLocation> items,
+                                     @Nullable List<DetailsFavourite> favourites) {
             this.fileLocationItems = items;
+            setFavourites(favourites);
             notifyDataSetChanged();
         }
 
@@ -637,10 +673,34 @@ public class MediaFileListFragment extends AbstractListFragment {
             return 1;
         }
 
+        private void setFavourites(@Nullable List<DetailsFavourite> favourites)
+        {
+            if (favourites != null) {
+                favouritePaths = new HashSet<>();
+                for (DetailsFavourite df : favourites) {
+                    favouritePaths.add(df.path);
+                }
+            }else {
+                favouritePaths = null;
+            }
+        }
+
+        public boolean isFavourite(FileLocation fileLocation)
+        {
+            if(favouritePaths == null) {
+                // If this happens, there's a bug in the program. Currently, no favourite information
+                // is fetched for folders, for example, but they shouldn't have a favourite icon
+                // to display either.
+                LogUtils.LOGE(TAG, "Trying to check favourite state for path which doesn't "
+                        + "have favourite information, item: " + fileLocation.file);
+            }
+            return favouritePaths.contains(fileLocation.file);
+        }
+
         /** {@inheritDoc} */
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder viewHolder;
+            final ViewHolder viewHolder;
             if (convertView == null) {
                 convertView = LayoutInflater.from(ctx)
                         .inflate(resource, parent, false);
@@ -655,10 +715,11 @@ public class MediaFileListFragment extends AbstractListFragment {
                 viewHolder.sizeDuration = (TextView) convertView.findViewById(R.id.size_duration);
 
                 convertView.setTag(viewHolder);
+            }else {
+                viewHolder = (ViewHolder) convertView.getTag();
             }
 
-            viewHolder = (ViewHolder) convertView.getTag();
-            FileLocation fileLocation = this.getItem(position);
+            final FileLocation fileLocation = this.getItem(position);
 
 //            if (fileLocation.isDirectory) {
 //                viewHolder.title.setText(fileLocation.title);
@@ -676,8 +737,20 @@ public class MediaFileListFragment extends AbstractListFragment {
                     viewHolder.art, artWidth, artHeight);
             // For the popup menu
             if (fileLocation.isDirectory) {
+                // TODO: it's not entirely clear that these operations are invalid / useless on directories
+                viewHolder.favouriteToggle.setVisibility(View.GONE);
                 viewHolder.contextMenu.setVisibility(View.GONE);
             } else {
+                viewHolder.favouriteToggle.setVisibility(View.VISIBLE);
+                viewHolder.favouriteToggle.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        viewHolder.favouriteToggle.kodiToggleFavourite(hostManager, callbackHandler,
+                                fileLocation.title, fileLocation.file);
+                    }
+                });
+                viewHolder.favouriteToggle.setFavouriteStatus(isFavourite(fileLocation));
+
                 viewHolder.contextMenu.setVisibility(View.VISIBLE);
                 viewHolder.contextMenu.setTag(position);
                 viewHolder.contextMenu.setOnClickListener(itemMenuClickListener);
@@ -695,6 +768,7 @@ public class MediaFileListFragment extends AbstractListFragment {
         TextView title;
         TextView details;
         TextView sizeDuration;
+        FavouriteToggle favouriteToggle;
         ImageView contextMenu;
     }
 
