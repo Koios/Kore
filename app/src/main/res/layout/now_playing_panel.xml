@@ -157,6 +157,15 @@
                 style="@style/Widget.Button.Borderless"
                 android:src="?attr/iconShuffle"
                 android:contentDescription="@string/shuffle"/>
+
+            <org.xbmc.kore.ui.widgets.StarButton
+                android:id="@+id/favourite_toggle"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                style="@style/Widget.Button.Borderless"
+                android:contentDescription="@string/toggle_favourite"/>
+                />
         </LinearLayout>
     </LinearLayout>
 </merge>

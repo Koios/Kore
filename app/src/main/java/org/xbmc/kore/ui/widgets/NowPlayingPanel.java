@@ -26,6 +26,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -63,6 +64,7 @@ public class NowPlayingPanel extends SlidingUpPanelLayout {
     @InjectView(R.id.npp_volume_muted_indicator) HighlightButton volumeMutedIndicatorButton;
     @InjectView(R.id.npp_repeat) RepeatModeButton repeatModeButton;
     @InjectView(R.id.npp_shuffle) HighlightButton shuffleButton;
+    @InjectView(R.id.favourite_toggle) StarButton toggleFavouriteButton;
 
     public NowPlayingPanel(Context context) {
         super(context);
@@ -185,6 +187,12 @@ public class NowPlayingPanel extends SlidingUpPanelLayout {
         shuffleButton.setOnClickListener(handleButtonClickListener);
         repeatModeButton.setOnClickListener(handleButtonClickListener);
         volumeMutedIndicatorButton.setOnClickListener(handleButtonClickListener);
+        toggleFavouriteButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getContext(), "foobar", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private OnClickListener handleButtonClickListener = new OnClickListener() {
