@@ -650,6 +650,7 @@ public class MediaFileListFragment extends AbstractListFragment {
                 viewHolder.art = (ImageView) convertView.findViewById(R.id.art);
                 viewHolder.title = (TextView) convertView.findViewById(R.id.title);
                 viewHolder.details = (TextView) convertView.findViewById(R.id.details);
+                viewHolder.favouriteToggle = (FavouriteToggle) convertView.findViewById(R.id.favourite_toggle);
                 viewHolder.contextMenu = (ImageView) convertView.findViewById(R.id.list_context_menu);
                 viewHolder.sizeDuration = (TextView) convertView.findViewById(R.id.size_duration);
 
