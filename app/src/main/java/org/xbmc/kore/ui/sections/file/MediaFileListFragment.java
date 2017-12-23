@@ -419,25 +419,6 @@ public class MediaFileListFragment extends AbstractListFragment {
         }, callbackHandler);
     }
 
-    private void addToFavourites(final String title, final String path) {
-        Favourites.Add addFavourite = new Favourites.Add(title, path);
-        addFavourite.execute(hostManager.getConnection(), new ApiCallback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean result) {
-                // TODO: use star ui instead of toast
-                String text = result ? "New favourite!" : "Already a favourite.";
-                Toast.makeText(getActivity(), text, Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onError(int errorCode, String description) {
-                Toast.makeText(getActivity(),
-                        String.format("Failed to add to favourites: %1$s.", description),
-                        Toast.LENGTH_LONG).show();
-            }
-        }, callbackHandler);
-    }
-
     /**
      * Queues the given media file on the active playlist, and starts it if nothing is playing
      * @param filename File to queue
@@ -598,8 +579,6 @@ public class MediaFileListFragment extends AbstractListFragment {
                                         }
                                         playMediaFile(loc.file);
                                         return true;
-                                    case R.id.action_add_to_favourites:
-                                        addToFavourites(loc.title, loc.file);
                                 }
                                 return false;
                             }
