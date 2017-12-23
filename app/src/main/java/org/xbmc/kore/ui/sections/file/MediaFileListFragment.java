@@ -50,12 +50,12 @@ import org.xbmc.kore.jsonrpc.type.PlayerType;
 import org.xbmc.kore.jsonrpc.type.PlaylistType;
 import org.xbmc.kore.ui.AbstractListFragment;
 import org.xbmc.kore.ui.widgets.StarButton;
+import org.xbmc.kore.ui.widgets.FavouriteButtonHolder;
 import org.xbmc.kore.utils.LogUtils;
 import org.xbmc.kore.utils.UIUtils;
 import org.xbmc.kore.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -685,15 +685,7 @@ public class MediaFileListFragment extends AbstractListFragment {
             }
         }
 
-        public boolean isFavourite(FileLocation fileLocation)
-        {
-            if(favouritePaths == null) {
-                // If this happens, there's a bug in the program. Currently, no favourite information
-                // is fetched for folders, for example, but they shouldn't have a favourite icon
-                // to display either.
-                LogUtils.LOGE(TAG, "Trying to check favourite state for path which doesn't "
-                        + "have favourite information, item: " + fileLocation.file);
-            }
+        boolean isFavourite(FileLocation fileLocation) {
             return favouritePaths.contains(fileLocation.file);
         }
 
@@ -710,7 +702,7 @@ public class MediaFileListFragment extends AbstractListFragment {
                 viewHolder.art = (ImageView) convertView.findViewById(R.id.art);
                 viewHolder.title = (TextView) convertView.findViewById(R.id.title);
                 viewHolder.details = (TextView) convertView.findViewById(R.id.details);
-                viewHolder.starButton = (StarButton) convertView.findViewById(R.id.star_button);
+                viewHolder.starButton = convertView.findViewById(R.id.star_button);
                 viewHolder.contextMenu = (ImageView) convertView.findViewById(R.id.list_context_menu);
                 viewHolder.sizeDuration = (TextView) convertView.findViewById(R.id.size_duration);
 
@@ -741,15 +733,14 @@ public class MediaFileListFragment extends AbstractListFragment {
                 viewHolder.starButton.setVisibility(View.GONE);
                 viewHolder.contextMenu.setVisibility(View.GONE);
             } else {
+                // since there can be favourites here, the should be info about which items are favourites
+                assert favouritePaths != null;
+
                 viewHolder.starButton.setVisibility(View.VISIBLE);
-                viewHolder.starButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        viewHolder.starButton.kodiToggleFavourite(hostManager, callbackHandler,
-                                fileLocation.title, fileLocation.file);
-                    }
-                });
-                viewHolder.starButton.setFavouriteStatus(isFavourite(fileLocation));
+
+                viewHolder.favouriteButton = new FavouriteButtonHolder(viewHolder.starButton,
+                        fileLocation.title, fileLocation.file, isFavourite(fileLocation),
+                        hostManager.getConnection(), callbackHandler, getContext());
 
                 viewHolder.contextMenu.setVisibility(View.VISIBLE);
                 viewHolder.contextMenu.setTag(position);
@@ -769,6 +760,7 @@ public class MediaFileListFragment extends AbstractListFragment {
         TextView details;
         TextView sizeDuration;
         StarButton starButton; // TODO: proper encapsulation
+        FavouriteButtonHolder favouriteButton; // TODO: probably doesn't need to be stored?
         ImageView contextMenu;
     }
 

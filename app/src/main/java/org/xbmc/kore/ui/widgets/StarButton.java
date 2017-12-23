@@ -1,15 +1,10 @@
 package org.xbmc.kore.ui.widgets;
 
 import android.content.Context;
-import android.os.Handler;
 import android.support.v7.widget.AppCompatImageButton;
 import android.util.AttributeSet;
-import android.widget.Toast;
 
 import org.xbmc.kore.R;
-import org.xbmc.kore.host.HostManager;
-import org.xbmc.kore.jsonrpc.ApiCallback;
-import org.xbmc.kore.jsonrpc.method.Favourites;
 
 
 /**
@@ -22,49 +17,31 @@ public class StarButton extends AppCompatImageButton {
     static float alphaFilled = 1.0f;
     static float alphaOutline = 0.2f;
 
-    boolean isFavourite = false;
+    boolean isFilled = false;
 
     public StarButton(Context context) {
         super(context);
-        setFavouriteStatus(isFavourite);
+        setFilled(isFilled);
     }
 
     // TODO: silly constructor duplication
     public StarButton(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setFavouriteStatus(isFavourite);
+        setFilled(isFilled);
     }
 
     public StarButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        setFavouriteStatus(isFavourite);
+        setFilled(isFilled);
     }
 
-    public void setFavouriteStatus(boolean isFavourite) {
-        setAlpha(isFavourite ? alphaFilled : alphaOutline);
-        setImageResource(isFavourite ? starFilled : starOutline);
-        this.isFavourite = isFavourite;
+    public void setFilled(boolean isFilled) {
+        setAlpha(isFilled ? alphaFilled : alphaOutline);
+        setImageResource(isFilled ? starFilled : starOutline);
+        this.isFilled = isFilled;
     }
 
-    public void toggleFavouriteStatus() {
-        setFavouriteStatus(!isFavourite);
-    }
-     // TODO: split into pure UI button and button + action (with built-in click event handler)?
-    public void kodiToggleFavourite(HostManager hostManager, Handler callbackHandler,
-                                    String title, String path) {
-        Favourites.Toggle t = new Favourites.Toggle(title, path);
-
-        t.execute(hostManager.getConnection(), new ApiCallback<String>() {
-            @Override
-            public void onSuccess(String result) {
-                toggleFavouriteStatus();
-            }
-
-            @Override
-            public void onError(int errorCode, String description) {
-                Toast.makeText(getContext(), "Failed to change favourite state: " + description,
-                        Toast.LENGTH_LONG).show();
-            }
-        }, callbackHandler);
+    public boolean getFilled() {
+        return isFilled;
     }
 }
