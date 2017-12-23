@@ -44,6 +44,8 @@ import org.xbmc.kore.jsonrpc.method.GUI;
 import org.xbmc.kore.jsonrpc.type.FavouriteType;
 import org.xbmc.kore.jsonrpc.type.PlaylistType;
 import org.xbmc.kore.ui.AbstractListFragment;
+import org.xbmc.kore.ui.widgets.FavouriteButtonHolder;
+import org.xbmc.kore.ui.widgets.StarButton;
 import org.xbmc.kore.utils.LogUtils;
 import org.xbmc.kore.utils.MediaPlayerUtils;
 import org.xbmc.kore.utils.UIUtils;
@@ -57,17 +59,10 @@ public class FavouritesListFragment extends AbstractListFragment implements Swip
 
     private Handler callbackHandler = new Handler();
 
-    private Drawable starFilled;
-    private Drawable starUnfilled;
-
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         getFavourites();
-        // getDrawable requires the activity to be initialized,
-        // that's why we have to postpone the initialization until here
-        starFilled = getDrawable(R.drawable.ic_star_white_24dp);
-        starUnfilled = getDrawable(R.drawable.ic_star_unfilled);
     }
 
     @Override
@@ -163,39 +158,6 @@ public class FavouritesListFragment extends AbstractListFragment implements Swip
         favouritesAdapter.notifyDataSetChanged();
     }
 
-    private Drawable getDrawable(int id) {
-        return getContext().getResources().getDrawable(id);
-    }
-
-    private void kodiToggleFavourite(String title, String path, final ImageView favouriteToggle) {
-        HostManager hostManager = HostManager.getInstance(getActivity());
-
-        Favourites.Toggle t = new Favourites.Toggle(title, path);
-
-        t.execute(hostManager.getConnection(), new ApiCallback<String>() {
-            @Override
-            public void onSuccess(String result) {
-                toggleStar(favouriteToggle);
-            }
-
-            @Override
-            public void onError(int errorCode, String description) {
-                Toast.makeText(getContext(), "Failed to change favourite state: " + description,
-                        Toast.LENGTH_LONG).show();
-            }
-        }, callbackHandler);
-    }
-
-    private void toggleStar(final ImageView favouriteToggle)
-    {
-        boolean on = (boolean)favouriteToggle.getTag(); // this is the state before the toggle
-        on = !on;
-        favouriteToggle.setTag(on);
-
-        favouriteToggle.setAlpha(on ? 1.0f : 0.2f);
-        favouriteToggle.setImageDrawable(on ? starFilled : starUnfilled);
-    }
-
     private class FavouritesAdapter extends ArrayAdapter<FavouriteType.DetailsFavourite> {
 
         private final HostManager hostManager;
@@ -233,15 +195,10 @@ public class FavouritesListFragment extends AbstractListFragment implements Swip
             */
             vh.contextMenu.setVisibility(View.INVISIBLE);
 
-            vh.favouriteToggle.setTag(true);
-            vh.favouriteToggle.setVisibility(View.VISIBLE);
-            vh.favouriteToggle.setOnClickListener(new View.OnClickListener(){
-                @Override
-                public void onClick(View v) {
-                    kodiToggleFavourite(favouriteDetail.title, favouriteDetail.path,
-                            vh.favouriteToggle);
-                }
-            });
+            vh.favouriteButtonHolder = new FavouriteButtonHolder(vh.starButton,
+                    favouriteDetail.title, favouriteDetail.path, true,
+                    hostManager.getConnection(), callbackHandler, getContext());
+            vh.starButton.setVisibility(View.VISIBLE);
 
             vh.titleView.setText(favouriteDetail.title);
 
@@ -271,14 +228,15 @@ public class FavouritesListFragment extends AbstractListFragment implements Swip
 
     private static class FavouriteItemViewHolder {
         final ImageView artView;
-        final ImageView favouriteToggle;
+        final StarButton starButton;
+        FavouriteButtonHolder favouriteButtonHolder;
         final ImageView contextMenu;
         final TextView titleView;
         final TextView detailView;
 
         FavouriteItemViewHolder(View v) {
             artView = ButterKnife.findById(v, R.id.art);
-            favouriteToggle = ButterKnife.findById(v, R.id.star_button);
+            starButton = ButterKnife.findById(v, R.id.star_button);
             contextMenu = ButterKnife.findById(v, R.id.list_context_menu);
             titleView = ButterKnife.findById(v, R.id.title);
             detailView = ButterKnife.findById(v, R.id.details);
