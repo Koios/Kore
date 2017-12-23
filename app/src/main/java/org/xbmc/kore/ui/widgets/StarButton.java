@@ -15,7 +15,7 @@ public class StarButton extends AppCompatImageButton {
     static int starFilled = R.drawable.ic_star_white_24dp;
     static int starOutline = R.drawable.ic_star_unfilled;
     static float alphaFilled = 1.0f;
-    static float alphaOutline = 0.2f;
+    static float alphaOutline = 0.4f;
 
     boolean isFilled = false;
 
