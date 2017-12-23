@@ -118,8 +118,30 @@ public class Favourites {
      */
     public static class Add {
         public Add(String title, String path) {
+            set = new Set(title, path, true);
+        }
+
+        public void execute(final HostConnection hostConnection,
+                            final ApiCallback<Boolean> callback,
+                            final Handler handler) {
+            set.execute(hostConnection, callback, handler);
+        }
+
+        private Set set;
+    }
+
+    /**
+     * Convenience ApiMethod which calls GetFavourites, Toggle under the hood.
+     *
+     * Same usage as an ApiMethod<Boolean> extension; the boolean parameter is true IFF the 'favourite'
+     * state was changed by this ApiMethod. False means that something external changed the state to
+     * the desired state.
+     */
+    public static class Set {
+        public Set(String title, String path, boolean shallBeFavourite) {
             this.title = title;
             this.path = path;
+            this.shallBeFavourite = shallBeFavourite;
         }
 
         public void execute(final HostConnection hostConnection,
@@ -129,36 +151,52 @@ public class Favourites {
             getFavourites.execute(hostConnection, new ApiCallback<ApiList<FavouriteType.DetailsFavourite>>() {
                 @Override
                 public void onSuccess(ApiList<FavouriteType.DetailsFavourite> result) {
-                    LogUtils.LOGD(TAG,
-                            String.format("Successfully retrieved favourites to add new favourite: %1$s",
-                                    path));
+                    LogUtils.LOGD(TAG, String.format("Successfully retrieved favourites " +
+                            "to set favourite state for: %1$s", path));
 
-                    if(containsFavourite(result.items, path)) {
-                        LogUtils.LOGI(TAG, String.format("Item is already a favourite: %1$s", path));
-                        callback.onSuccess(false);
-                    }else {
-                        LogUtils.LOGI(TAG, String.format("Item is NOT a favourite yet: %1$s", path));
-
-                        Toggle toggle = new Toggle(title, path);
-                        toggle.execute(hostConnection, new ApiCallback<String>() {
-                            @Override
-                            public void onSuccess(String result) {
-                                LogUtils.LOGI(TAG, String.format("Successfully toggled favourite state for: %1$s", path));
-                                callback.onSuccess(true);
-                            }
-
-                            @Override
-                            public void onError(int errorCode, String description) {
-                                LogUtils.LOGE(TAG, String.format("Failed to toggle favourite state for: %1$s", path));
-                                callback.onError(errorCode, description);
-                            }
-                        }, handler);
-                    }
+                    final boolean isCurrentlyFavourite = containsFavourite(result.items, path);
+                    adjustStateIfNecessary(shallBeFavourite, isCurrentlyFavourite,
+                            hostConnection, callback, handler);
                 }
 
                 @Override
                 public void onError(int errorCode, String description) {
-                    LogUtils.LOGE(TAG, String.format("Failed to get favourites while trying to add new favourite: %1$s", path));
+                    LogUtils.LOGE(TAG, String.format("Failed to get favourites " +
+                            "while trying to change favourite state for: %1$s", path));
+                    callback.onError(errorCode, description);
+                }
+            }, handler);
+        }
+
+        private void adjustStateIfNecessary(boolean shallBeFavourite, boolean isCurrentlyFavourite,
+                                            HostConnection hostConnection, ApiCallback<Boolean> callback,
+                                            Handler handler) {
+            if(shallBeFavourite == isCurrentlyFavourite) {
+                LogUtils.LOGI(TAG, String.format("Current favourite state '%1$b' " +
+                        "is already equal to desired state for item: %1$s", shallBeFavourite, path));
+                callback.onSuccess(false);
+            }else {
+                LogUtils.LOGI(TAG, String.format("Need to change favourite state " +
+                                "from '%1$b' currently to '%1$b' desired for item: %1$s", path,
+                        isCurrentlyFavourite, shallBeFavourite));
+
+                doAdjustState(shallBeFavourite, hostConnection, callback, handler);
+            }
+        }
+
+        private void doAdjustState(boolean shallBeFavourite, HostConnection hostConnection,
+                                   final ApiCallback<Boolean> callback, Handler handler) {
+            Toggle toggle = new Toggle(title, path);
+            toggle.execute(hostConnection, new ApiCallback<String>() {
+                @Override
+                public void onSuccess(String result) {
+                    LogUtils.LOGI(TAG, String.format("Successfully toggled favourite state for: %1$s", path));
+                    callback.onSuccess(true);
+                }
+
+                @Override
+                public void onError(int errorCode, String description) {
+                    LogUtils.LOGE(TAG, String.format("Failed to toggle favourite state for: %1$s", path));
                     callback.onError(errorCode, description);
                 }
             }, handler);
@@ -166,5 +204,6 @@ public class Favourites {
 
         private final String title;
         private final String path;
+        private final boolean shallBeFavourite;
     }
 }
