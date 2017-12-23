@@ -55,9 +55,11 @@ import org.xbmc.kore.jsonrpc.type.PlayerType;
 import org.xbmc.kore.jsonrpc.type.VideoType;
 import org.xbmc.kore.ui.generic.GenericSelectDialog;
 import org.xbmc.kore.ui.sections.video.AllCastActivity;
+import org.xbmc.kore.ui.widgets.FavouriteButtonHolder;
 import org.xbmc.kore.ui.widgets.HighlightButton;
 import org.xbmc.kore.ui.widgets.MediaProgressIndicator;
 import org.xbmc.kore.ui.widgets.RepeatModeButton;
+import org.xbmc.kore.ui.widgets.StarButton;
 import org.xbmc.kore.ui.widgets.VolumeLevelIndicator;
 import org.xbmc.kore.utils.LogUtils;
 import org.xbmc.kore.utils.UIUtils;
@@ -138,6 +140,9 @@ public class NowPlayingFragment extends Fragment
     @InjectView(R.id.shuffle) HighlightButton shuffleButton;
     @InjectView(R.id.repeat) RepeatModeButton repeatButton;
     @InjectView(R.id.overflow) ImageButton overflowButton;
+
+    @InjectView(R.id.favourite_toggle) StarButton favouriteToggle;
+    FavouriteButtonHolder favouriteButtonHolder;
 
     @InjectView(R.id.info_panel) RelativeLayout infoPanel;
     @InjectView(R.id.media_panel) ScrollView mediaPanel;
@@ -784,6 +789,9 @@ public class NowPlayingFragment extends Fragment
 
         UIUtils.setRepeatButton(repeatButton, getPropertiesResult.repeat);
         shuffleButton.setHighlight(getPropertiesResult.shuffled);
+
+        favouriteButtonHolder = new FavouriteButtonHolder(favouriteToggle, title, "foobar",
+                false, hostManager.getConnection(), callbackHandler, getContext());
 
         Resources resources = getActivity().getResources();
         DisplayMetrics displayMetrics = new DisplayMetrics();
